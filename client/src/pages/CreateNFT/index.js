@@ -38,19 +38,21 @@ const CreateNFT = () => {
 
   async function createNFT(event) {
     event.preventDefault();
-    const { title, description } = formData;
+    const { title, description, price } = formData;
 
     console.log("title: " + title);
 
     const data = new FormData();
     data.append("name", title);
     data.append("description", description);
+    data.append("price", price);
 
     if(selectedFile){
       data.append('img', selectedFile);
       console.log("slectedFile: ", selectedFile);
     }
 
+    // console.log("minted data", data);
     try {
       const totalSupply = await artTokenContract.methods.totalSupply().call();
       data.append("tokenId", Number(totalSupply) + 1);

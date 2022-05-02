@@ -8,8 +8,9 @@ import Button from '@material-ui/core/Button';
 import getWeb3 from "../../utils/getWeb3";
 import { api } from "../../services/api";
 
-import ArtMarketplace from "../../contracts/ArtMarketplace.json";
 import ArtToken from "../../contracts/ArtToken.json";
+import ArtMarketplace from "../../contracts/ArtMarketplace.json";
+import addresses from "../../contracts/contract-address.json";
 
 import {
   setNft,
@@ -43,22 +44,28 @@ const Home = () => {
       try {
         const web3 = await getWeb3();
         const accounts = await web3.eth.getAccounts();
-
+        console.log("accounts", accounts);
         if (typeof accounts === undefined) {
           alert("Please login with Metamask!");
           console.log("login to metamask");
         }
 
         const networkId = await web3.eth.net.getId();
+
         try {
+
+          console.log("networkId", networkId);
           const artTokenContract = new web3.eth.Contract(
             ArtToken.abi,
-            ArtToken.networks[networkId].address
+            //ArtToken.networks[networkId].address
+            addresses.ArtToken
           );
           // console.log("Contract: ", artTokenContract);
           const marketplaceContract = new web3.eth.Contract(
-            ArtMarketplace.abi,
-            ArtMarketplace.networks[networkId].address
+            ArtMarketplace.interface.abi,
+            //ArtMarketplace.networks[networkId].address
+            //addresses.MarketplaceToken
+            ArtMarketplace.address,
           );
           const totalSupply = await artTokenContract.methods
             .totalSupply()

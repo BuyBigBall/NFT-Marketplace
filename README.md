@@ -146,3 +146,125 @@ This project is under the **MIT license**. See the [LICENSE](https://github.com/
 <br/>
   Made with :coffee: and ❤️ by <b>Natalie Bravo</b>.
 <p/>
+
+
+
+
+<br/>
+# Truffle Project to HardHat project
+
+  first,
+
+  ```
+  npx hardhat
+  ```
+
+  hardhat.config.js
+  
+  ```
+  require("@nomiclabs/hardhat-waffle");
+  //require("@nomiclabs/hardhat-truffle5"); 
+
+  /**
+  * @type import('hardhat/config').HardhatUserConfig
+  */
+  module.exports = {
+    solidity: "0.8.0",
+  };
+
+  ```
+
+Do not install Hardhat globally. If you already have installed hardhat globally, please uninstall as the issue might be because of that as mentioned in the error message.
+
+Things you need to do to mitigate this:
+
+1. Check if the project package.json has hardhat as its dev dependency. If it is not, 
+```
+    run npm install --save-dev hardhat 
+    or 
+    yarn add --dev hardhat
+```
+2. Uninstall any global version of hardhat
+3. Remove node_modules and run npm install or yarn install to install all dependencies.
+4. Try running npx hardhat compile or npx hardhat node to check if it works.
+
+
+
+next,
+```
+mkdir scripts
+```
+
+```
+  npm install "@nomiclabs/hardhat-waffle"
+  npm install "@nomiclabs/hardhat-ethers@^2.0.0" "ethereum-waffle@^3.2.0"
+```
+
+```
+// scripts/deploy.js
+
+async function main() {
+    const [deployer] = await ethers.getSigners();
+  
+    console.log("Deploying contracts with the account:", deployer.address);
+  
+    // console.log("Account balance:", (await deployer.getBalance()).toString());
+  
+    const Token1 = await ethers.getContractFactory("ArtToken");
+    const artToken = await Token1.deploy();
+    await artToken.deployed();
+    console.log("Art Token address:", artToken.address);
+
+    const Token2 = await ethers.getContractFactory("ArtMarketplace");
+    const marketplaceToken = await Token2.deploy(artToken.address);
+    await marketplaceToken.deployed();
+    console.log("MarketPlace Token address:", marketplaceToken.address);
+
+    const fs = require("fs");
+    const contractsDir = __dirname + "/../client/src/contracts";
+    if (!fs.existsSync(contractsDir)) {
+      fs.mkdirSync(contractsDir);
+    }
+
+    fs.writeFileSync(
+      contractsDir + "/contract-address.json",
+      JSON.stringify({ 
+        ArtToken : artToken.address,
+        MarketplaceToken : marketplaceToken.address
+      }, undefined, 2)
+    );
+
+    const artTokenArtifact = artifacts.readArtifactSync("ArtToken");
+    fs.writeFileSync(
+        contractsDir + "/ArtToken.json",
+        JSON.stringify(artTokenArtifact, null, 2)
+    );
+    const marketplaceTokenArtifact = artifacts.readArtifactSync("ArtMarketplace");
+    fs.writeFileSync(
+        contractsDir + "/ArtMarketplace.json",
+        JSON.stringify(marketplaceToken, null, 2)
+    );
+  }
+  
+  main()
+    .then(() => process.exit(0))
+    .catch((error) => {
+      console.error(error);
+      process.exit(1);
+    });
+```
+
+
+
+compile
+
+```
+  npx hardhat compile
+```
+
+
+deploy
+
+```
+  npx hardhat run scripts/deploy.js --network localhost
+```

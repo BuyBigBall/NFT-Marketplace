@@ -21,16 +21,17 @@ const tokensRoutes = (app) => {
   // CREATE
   app.post('/tokens', upload.single('img'), (req, res) => {
     const { filename } = req.file;
-    const { tokenId, name, description } = req.body;
+    const { tokenId, name, description, price } = req.body;
 
     // const tokenId = uuidv4();
 
     tokens[tokenId] = {
       name,
       description,
-      image: req.protocol + '://' + req.get('host') + "/images/" + filename
+      image: req.protocol + '://' + req.get('host') + "/images/" + filename,
+      price
     };
-
+    console.log("tokens",tokens);
     fs.writeFileSync(dbFile, JSON.stringify(tokens));
 
     var fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl + '/' + tokenId;
